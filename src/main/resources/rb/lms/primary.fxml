@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox alignment="CENTER" spacing="10.0"
+      xmlns="http://javafx.com/javafx/11"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="rb.lms.PrimaryController"
+      prefWidth="440" prefHeight="540"
+      style="-fx-background-color: #f5f5f5;">
+
+    <padding>
+        <Insets top="30" right="60" bottom="30" left="60"/>
+    </padding>
+
+    <!-- Header -->
+    <Label text="🎓 LMS Poligran" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+    <Label text="Sistema de Gestión de Aprendizaje" style="-fx-font-size: 11px; -fx-text-fill: #7f8c8d;"/>
+    <Separator/>
+
+    <!-- Email -->
+    <Label text="Correo institucional" style="-fx-font-weight: bold; -fx-font-size: 12px;"/>
+    <TextField fx:id="emailField" promptText="usuario@poligran.edu.co" maxWidth="Infinity"
+               style="-fx-pref-height: 32px;"/>
+
+    <!-- Contraseña -->
+    <Label text="Contraseña" style="-fx-font-weight: bold; -fx-font-size: 12px;"/>
+    <PasswordField fx:id="passwordField" promptText="Contraseña" maxWidth="Infinity"
+                   style="-fx-pref-height: 32px;"/>
+    <TextField fx:id="passwordVisibleField" promptText="Contraseña" maxWidth="Infinity"
+               visible="false" managed="false" style="-fx-pref-height: 32px;"/>
+
+    <!-- Confirmar contraseña -->
+    <Label text="Confirmar contraseña (solo registro)" style="-fx-font-size: 11px; -fx-text-fill: #555;"/>
+    <PasswordField fx:id="confirmPasswordField" promptText="Confirmar contraseña" maxWidth="Infinity"
+                   style="-fx-pref-height: 32px;"/>
+    <TextField fx:id="confirmPasswordVisibleField" promptText="Confirmar contraseña" maxWidth="Infinity"
+               visible="false" managed="false" style="-fx-pref-height: 32px;"/>
+
+    <CheckBox fx:id="mostrarPassword" text="Mostrar contraseña" style="-fx-font-size: 11px;"/>
+
+    <!-- Rol (solo registro) -->
+    <Label text="Rol (solo registro)" style="-fx-font-size: 11px; -fx-text-fill: #555;"/>
+    <ComboBox fx:id="rolComboBox" maxWidth="Infinity" promptText="Seleccionar rol"
+              style="-fx-pref-height: 32px;"/>
+
+    <Separator/>
+
+    <!-- Botones -->
+    <HBox spacing="12" alignment="CENTER">
+        <Button text="Iniciar Sesión" onAction="#login" prefWidth="140"
+                style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-pref-height: 34px;"/>
+        <Button text="Registrarse" onAction="#registrar" prefWidth="140"
+                style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-pref-height: 34px;"/>
+    </HBox>
+
+    <Label fx:id="mensajeLabel" wrapText="true" maxWidth="Infinity"
+           style="-fx-font-size: 12px;" alignment="CENTER"/>
+
+</VBox>
+

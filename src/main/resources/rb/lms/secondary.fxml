@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox alignment="TOP_CENTER" spacing="10.0"
+      xmlns="http://javafx.com/javafx/11"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="rb.lms.SecondaryController"
+      prefWidth="440" prefHeight="540"
+      style="-fx-background-color: #f5f5f5;">
+
+    <padding>
+        <Insets top="20" right="40" bottom="20" left="40"/>
+    </padding>
+
+    <Label fx:id="tituloPanel" text="Panel LMS"
+           style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+    <Label fx:id="subtituloPanel" text="" style="-fx-font-size: 11px; -fx-text-fill: #7f8c8d;" wrapText="true" maxWidth="Infinity"/>
+    <Separator/>
+
+    <TextField fx:id="tituloField" promptText="Titulo de la tarea" maxWidth="Infinity"
+               visible="false" managed="false" style="-fx-pref-height:32px;"/>
+
+    <TextArea fx:id="contenidoArea" promptText="Descripcion / Contenido de entrega..."
+              prefHeight="100" maxWidth="Infinity" wrapText="true"
+              visible="false" managed="false"/>
+
+    <HBox fx:id="archivoBox" spacing="8" alignment="CENTER_LEFT"
+          visible="false" managed="false">
+        <Label text="Archivo:" style="-fx-font-size: 11px;"/>
+        <TextField fx:id="archivoField" promptText="nombre_archivo.pdf (simulado)"
+                   style="-fx-pref-height:28px;" HBox.hgrow="ALWAYS"/>
+    </HBox>
+
+    <ListView fx:id="listaItems" prefHeight="180" maxWidth="Infinity"/>
+
+    <HBox fx:id="calificarBox" spacing="8" alignment="CENTER_LEFT"
+          visible="false" managed="false">
+        <TextField fx:id="notaField" promptText="Nota (0.0-5.0)" prefWidth="100"
+                   style="-fx-pref-height:32px;"/>
+        <TextField fx:id="comentarioField" promptText="Comentario (opcional)"
+                   HBox.hgrow="ALWAYS" style="-fx-pref-height:32px;"/>
+    </HBox>
+
+    <TextArea fx:id="resultadoArea" prefHeight="130" maxWidth="Infinity"
+              wrapText="true" editable="false"
+              visible="false" managed="false"
+              style="-fx-font-family: monospace; -fx-font-size: 11px;"/>
+
+    <Button fx:id="btnAccion" text="Accion" onAction="#ejecutarAccion"
+            maxWidth="Infinity" visible="false" managed="false"
+            style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-pref-height:34px; -fx-font-weight:bold;"/>
+
+    <HBox spacing="8" alignment="CENTER">
+        <Button fx:id="btnEditar" text="Cargar seleccion" onAction="#editarTarea"
+                visible="false" managed="false" prefWidth="150"/>
+        <Button fx:id="btnEliminar" text="Eliminar seleccion" onAction="#eliminarTarea"
+                visible="false" managed="false" prefWidth="150"/>
+    </HBox>
+
+    <Label fx:id="mensajeLabel" wrapText="true" maxWidth="Infinity"
+           style="-fx-font-size: 12px; -fx-font-weight: bold;"/>
+
+    <Separator/>
+
+    <Button text="Volver al menu" onAction="#volver" prefWidth="160"
+            style="-fx-pref-height:32px;"/>
+
+</VBox>

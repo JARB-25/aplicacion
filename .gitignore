@@ -1,0 +1,11 @@
+target/
+out-check/
+data/
+.settings/
+.classpath
+.project
+*.log
+*.tmp
+*.bak
+.DS_Store
+Thumbs.db
