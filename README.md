@@ -4,7 +4,7 @@ Proyecto JavaFX con Maven Wrapper listo para clonar y compilar en otra computado
 
 ## Requisitos
 
-- JDK 17 instalado
+- JDK 17 o superior instalado
 - `JAVA_HOME` apuntando a esa instalacion del JDK
 
 ## Compilar
@@ -41,3 +41,10 @@ En Linux o macOS:
 - La carpeta `data/` se genera automaticamente en tiempo de ejecucion y no se versiona.
 - Los archivos generados de compilacion tampoco se versionan.
 - Si en Windows el wrapper no encuentra Java, configura `JAVA_HOME` y vuelve a ejecutar el comando.
+- Ejemplo en Windows PowerShell si ya tienes un JDK instalado:
+
+```powershell
+$env:JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-17"
+$env:Path="$env:JAVA_HOME\bin;$env:Path"
+.\mvnw.cmd clean package
+```
