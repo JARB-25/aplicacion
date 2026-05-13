@@ -1,15 +1,26 @@
 package service;
 
-import model.*;
 import exception.AccesoDenegadoException;
+import model.Grupo;
+import model.Materia;
+import model.Periodo;
+import model.Rol;
+import model.Usuario;
+
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class GrupoService {
 
-    private List<Grupo> grupos = new ArrayList<>();
+    private Map<String, Grupo> grupos = new HashMap<>();
 
-    /** Solo un PROFESOR puede crear un grupo */
+    private String clave(String codigo, Periodo periodo) {
+        return codigo + ":" + periodo.getNombre();
+    }
+
     public Grupo crearGrupo(
             String codigo,
             Materia materia,
@@ -19,14 +30,12 @@ public class GrupoService {
         if (profesor.getRol() != Rol.PROFESOR) {
             throw new AccesoDenegadoException("Solo profesores pueden crear grupos");
         }
-        // Evitar código duplicado en el mismo período
-        for (Grupo g : grupos) {
-            if (g.getCodigo().equals(codigo) && g.getPeriodo().equals(periodo)) {
-                throw new RuntimeException("Ya existe un grupo con ese código en este período");
-            }
+        String k = clave(codigo, periodo);
+        if (grupos.containsKey(k)) {
+            throw new RuntimeException("Ya existe un grupo con ese codigo en este periodo");
         }
         Grupo grupo = new Grupo(codigo, materia, periodo, profesor);
-        grupos.add(grupo);
+        grupos.put(k, grupo);
         return grupo;
     }
 
@@ -34,10 +43,9 @@ public class GrupoService {
         grupo.inscribirEstudiante(estudiante);
     }
 
-    /** Retorna los grupos activos (período vigente) de una materia */
     public List<Grupo> getGruposActivos(Materia materia) {
         List<Grupo> activos = new ArrayList<>();
-        for (Grupo g : grupos) {
+        for (Grupo g : grupos.values()) {
             if (g.getMateria().equals(materia) && g.getPeriodo().estaActivo()) {
                 activos.add(g);
             }
@@ -47,7 +55,7 @@ public class GrupoService {
 
     public List<Grupo> getGruposDeEstudiante(Usuario estudiante) {
         List<Grupo> resultado = new ArrayList<>();
-        for (Grupo g : grupos) {
+        for (Grupo g : grupos.values()) {
             if (g.getEstudiantes().contains(estudiante)) {
                 resultado.add(g);
             }
@@ -55,5 +63,7 @@ public class GrupoService {
         return resultado;
     }
 
-    public List<Grupo> getGrupos() { return grupos; }
+    public Collection<Grupo> getGrupos() {
+        return grupos.values();
+    }
 }

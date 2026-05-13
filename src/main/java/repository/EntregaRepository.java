@@ -2,49 +2,47 @@ package repository;
 
 import model.Entrega;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-/**
- * Repositorio de entregas persistido en data/entregas.dat.
- * Actualiza en lugar de duplicar (mismo estudiante + misma tarea).
- */
 public class EntregaRepository implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private static final String FILE = "data/entregas.dat";
 
-    private List<Entrega> entregas = new ArrayList<>();
+    private Map<String, Entrega> entregas = new HashMap<>();
 
     public EntregaRepository() {
         cargar();
     }
 
+    private String clave(Entrega e) {
+        return e.getEstudiante().getEmail() + ":" + e.getTarea().getTitulo();
+    }
+
     public void guardar(Entrega e) {
-        for (int i = 0; i < entregas.size(); i++) {
-            if (entregas.get(i).equals(e)) { // equals por estudiante+tarea
-                entregas.set(i, e);
-                guardarArchivo();
-                return;
-            }
-        }
-        entregas.add(e);
+        entregas.put(clave(e), e);
         guardarArchivo();
     }
 
     public List<Entrega> getAll() {
-        return new ArrayList<>(entregas);
+        return new ArrayList<>(entregas.values());
     }
-
-    // ── Persistencia ──────────────────────────────────────────────────────────
 
     private void guardarArchivo() {
         try {
             File file = new File(FILE);
             file.getParentFile().mkdirs();
             try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
-                oos.writeObject(entregas);
+                oos.writeObject(new ArrayList<>(entregas.values()));
             }
         } catch (Exception e) {
             System.err.println("Error guardando entregas: " + e.getMessage());
@@ -54,7 +52,10 @@ public class EntregaRepository implements Serializable {
     @SuppressWarnings("unchecked")
     private void cargar() {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FILE))) {
-            entregas = (List<Entrega>) ois.readObject();
+            List<Entrega> lista = (List<Entrega>) ois.readObject();
+            for (Entrega e : lista) {
+                entregas.put(clave(e), e);
+            }
         } catch (Exception e) {
             System.out.println("Repositorio de entregas nuevo.");
         }

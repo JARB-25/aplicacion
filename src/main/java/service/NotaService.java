@@ -1,18 +1,23 @@
 package service;
 
-import model.*;
 import exception.AccesoDenegadoException;
+import model.Entrega;
+import model.EstadoTarea;
+import model.Materia;
+import model.NotaFinal;
+import model.Periodo;
+import model.Rol;
+import model.Usuario;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class NotaService {
 
-    private List<NotaFinal> notasFinales = new ArrayList<>();
+    private Map<String, List<NotaFinal>> notasFinales = new HashMap<>();
 
-    /**
-     * Calcula el promedio de todas las entregas CALIFICADAS
-     * de un estudiante en una materia y genera su NotaFinal.
-     */
     public NotaFinal calcularNotaFinal(
             Usuario profesor,
             Usuario estudiante,
@@ -47,31 +52,31 @@ public class NotaService {
                                .orElse(0.0);
 
         NotaFinal notaFinal = new NotaFinal(estudiante, materia, periodo, promedio);
-        notasFinales.add(notaFinal);
+        notasFinales
+            .computeIfAbsent(estudiante.getEmail(), k -> new ArrayList<>())
+            .add(notaFinal);
         return notaFinal;
     }
 
-    /** Retorna todas las notas finales de un estudiante en todos los períodos */
     public List<NotaFinal> getHistorialEstudiante(Usuario estudiante) {
-        List<NotaFinal> historial = new ArrayList<>();
-        for (NotaFinal n : notasFinales) {
-            if (n.getEstudiante().equals(estudiante)) {
-                historial.add(n);
-            }
-        }
-        return historial;
+        return notasFinales.getOrDefault(estudiante.getEmail(), new ArrayList<>());
     }
 
-    /** Retorna todas las notas de una materia en un período específico */
     public List<NotaFinal> getNotasPorMateriaPeriodo(Materia materia, Periodo periodo) {
         List<NotaFinal> resultado = new ArrayList<>();
-        for (NotaFinal n : notasFinales) {
-            if (n.getMateria().equals(materia) && n.getPeriodo().equals(periodo)) {
-                resultado.add(n);
+        for (List<NotaFinal> lista : notasFinales.values()) {
+            for (NotaFinal n : lista) {
+                if (n.getMateria().equals(materia) && n.getPeriodo().equals(periodo)) {
+                    resultado.add(n);
+                }
             }
         }
         return resultado;
     }
 
-    public List<NotaFinal> getNotasFinales() { return notasFinales; }
+    public List<NotaFinal> getNotasFinales() {
+        List<NotaFinal> todas = new ArrayList<>();
+        notasFinales.values().forEach(todas::addAll);
+        return todas;
+    }
 }

@@ -2,62 +2,52 @@ package repository;
 
 import model.Tarea;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TareaRepository implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    // Directorio base — mismo que antes
     private static final String DIR = "data/";
 
-    /** Devuelve la ruta del archivo para una materia concreta */
     private String archivo(String nombreMateria) {
-        // Sanitiza el nombre para que sea un nombre de archivo válido
         String nombre = nombreMateria.replaceAll("[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ_\\-]", "_");
         return DIR + "tareas_" + nombre + ".dat";
     }
 
-    // ── Guardar / actualizar ───────────────────────────────────────────────────
-
-    /** Guarda o actualiza la tarea dentro del archivo de su materia */
     public void guardar(Tarea tarea, String nombreMateria) {
-        List<Tarea> lista = cargar(nombreMateria);
-        for (int i = 0; i < lista.size(); i++) {
-            if (lista.get(i).getTitulo().equals(tarea.getTitulo())) {
-                lista.set(i, tarea);
-                guardarArchivo(lista, nombreMateria);
-                return;
-            }
-        }
-        lista.add(tarea);
-        guardarArchivo(lista, nombreMateria);
+        Map<String, Tarea> mapa = cargar(nombreMateria);
+        mapa.put(tarea.getTitulo(), tarea);
+        guardarArchivo(mapa, nombreMateria);
     }
 
-    // ── Leer ──────────────────────────────────────────────────────────────────
-
-    /** Devuelve todas las tareas de UNA materia */
     public List<Tarea> getAll(String nombreMateria) {
-        return cargar(nombreMateria);
+        return new ArrayList<>(cargar(nombreMateria).values());
     }
 
     public boolean eliminar(String titulo, String nombreMateria) {
-        List<Tarea> lista = cargar(nombreMateria);
-        boolean removed = lista.removeIf(t -> t.getTitulo().equals(titulo));
+        Map<String, Tarea> mapa = cargar(nombreMateria);
+        boolean removed = mapa.remove(titulo) != null;
         if (removed) {
-            guardarArchivo(lista, nombreMateria);
+            guardarArchivo(mapa, nombreMateria);
         }
         return removed;
     }
 
-    // ── Persistencia interna ──────────────────────────────────────────────────
-
-    private void guardarArchivo(List<Tarea> lista, String nombreMateria) {
+    private void guardarArchivo(Map<String, Tarea> mapa, String nombreMateria) {
         try {
             File file = new File(archivo(nombreMateria));
             file.getParentFile().mkdirs();
             try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
-                oos.writeObject(lista);
+                oos.writeObject(new ArrayList<>(mapa.values()));
             }
         } catch (Exception e) {
             System.err.println("Error guardando tareas de '" + nombreMateria + "': " + e.getMessage());
@@ -65,11 +55,16 @@ public class TareaRepository implements Serializable {
     }
 
     @SuppressWarnings("unchecked")
-    private List<Tarea> cargar(String nombreMateria) {
+    private Map<String, Tarea> cargar(String nombreMateria) {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(archivo(nombreMateria)))) {
-            return (List<Tarea>) ois.readObject();
+            List<Tarea> lista = (List<Tarea>) ois.readObject();
+            Map<String, Tarea> mapa = new LinkedHashMap<>();
+            for (Tarea tarea : lista) {
+                mapa.put(tarea.getTitulo(), tarea);
+            }
+            return mapa;
         } catch (Exception e) {
-            return new ArrayList<>();  // archivo nuevo o primera vez
+            return new LinkedHashMap<>();
         }
     }
 }

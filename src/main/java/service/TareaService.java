@@ -2,7 +2,10 @@ package service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import exception.AccesoDenegadoException;
 import exception.TareaFueraDeFechaException;
@@ -19,16 +22,21 @@ import repository.TareaRepository;
 
 public class TareaService {
 
-    private List<Entrega> entregas = new ArrayList<>();
+    private Map<String, Entrega> entregas = new HashMap<>();
     private final EntregaRepository entregaRepo = new EntregaRepository();
     private final TareaRepository tareaRepo = new TareaRepository();
     private HistorialRepository historialRepo;
 
+    private String claveEntrega(Usuario estudiante, Tarea tarea) {
+        return estudiante.getEmail() + ":" + tarea.getTitulo();
+    }
+
     public TareaService() {
         try {
-            entregas = entregaRepo.getAll();
+            for (Entrega e : entregaRepo.getAll()) {
+                entregas.put(claveEntrega(e.getEstudiante(), e.getTarea()), e);
+            }
         } catch (Exception e) {
-            entregas = new ArrayList<>();
         }
     }
 
@@ -37,7 +45,7 @@ public class TareaService {
     }
 
     public Tarea crearTarea(String titulo, String descripcion, Materia materia,
-                             Usuario profesor, LocalDate fechaLimite) {
+                            Usuario profesor, LocalDate fechaLimite) {
         if (profesor.getRol() != Rol.PROFESOR) {
             throw new AccesoDenegadoException("Solo profesores pueden crear tareas");
         }
@@ -95,7 +103,7 @@ public class TareaService {
     }
 
     public Entrega entregarTarea(Usuario estudiante, Materia materia, Tarea tarea,
-                                  String contenido, String nombreArchivo) {
+                                 String contenido, String nombreArchivo) {
         if (estudiante.getRol() != Rol.ESTUDIANTE) {
             throw new AccesoDenegadoException("Solo estudiantes pueden entregar tareas");
         }
@@ -105,17 +113,15 @@ public class TareaService {
         if (tarea.estaFueraDeFecha()) {
             throw new TareaFueraDeFechaException("La tarea vencio el " + tarea.getFechaLimite());
         }
-        for (Entrega e : entregas) {
-            if (e.getEstudiante().equals(estudiante) && e.getTarea().equals(tarea)) {
-                throw new RuntimeException("Ya entregaste esta tarea");
-            }
+        if (entregas.containsKey(claveEntrega(estudiante, tarea))) {
+            throw new RuntimeException("Ya entregaste esta tarea");
         }
 
         Entrega entrega = new Entrega(estudiante, tarea, contenido);
         if (nombreArchivo != null && !nombreArchivo.isBlank()) {
             entrega.setNombreArchivo(nombreArchivo);
         }
-        entregas.add(entrega);
+        entregas.put(claveEntrega(estudiante, tarea), entrega);
         entregaRepo.guardar(entrega);
 
         registrarHistorial(model.HistorialEntrada.TipoEvento.ENTREGA,
@@ -129,7 +135,7 @@ public class TareaService {
     }
 
     public void calificarTarea(Usuario profesor, Materia materia, Entrega entrega,
-                                double nota, String comentario) {
+                               double nota, String comentario) {
         if (profesor.getRol() != Rol.PROFESOR) {
             throw new AccesoDenegadoException("Solo profesores pueden calificar");
         }
@@ -145,6 +151,7 @@ public class TareaService {
         if (comentario != null && !comentario.isBlank()) {
             entrega.setComentarioProfesor(comentario);
         }
+        entregas.put(claveEntrega(entrega.getEstudiante(), entrega.getTarea()), entrega);
         entregaRepo.guardar(entrega);
 
         registrarHistorial(model.HistorialEntrada.TipoEvento.CALIFICACION,
@@ -160,7 +167,7 @@ public class TareaService {
     }
 
     public void clasificarEisenhower(Tarea tarea, boolean urgente, boolean importante,
-                                      Usuario profesor, Materia materia) {
+                                     Usuario profesor, Materia materia) {
         if (profesor.getRol() != Rol.PROFESOR) {
             throw new AccesoDenegadoException("Solo el profesor puede reclasificar tareas");
         }
@@ -169,8 +176,8 @@ public class TareaService {
         tareaRepo.guardar(tarea, materia.getNombre());
     }
 
-    public List<Entrega> getEntregas() {
-        return entregas;
+    public Collection<Entrega> getEntregas() {
+        return entregas.values();
     }
 
     public List<Tarea> obtenerTareasGuardadas(String nombreMateria) {
@@ -183,7 +190,7 @@ public class TareaService {
 
     public List<Entrega> obtenerEntregasCalificadas(Usuario estudiante) {
         List<Entrega> resultado = new ArrayList<>();
-        for (Entrega e : entregas) {
+        for (Entrega e : entregas.values()) {
             if (e.getEstudiante().equals(estudiante) && e.getEstado() == EstadoTarea.CALIFICADO) {
                 resultado.add(e);
             }
@@ -193,7 +200,7 @@ public class TareaService {
 
     public List<Entrega> obtenerEntregasPorEstudiante(Usuario estudiante) {
         List<Entrega> resultado = new ArrayList<>();
-        for (Entrega e : entregas) {
+        for (Entrega e : entregas.values()) {
             if (e.getEstudiante().equals(estudiante)) {
                 resultado.add(e);
             }
@@ -204,8 +211,7 @@ public class TareaService {
     public List<Tarea> obtenerTareasPendientes(Usuario estudiante, Materia materia) {
         List<Tarea> pendientes = new ArrayList<>();
         for (Tarea tarea : materia.getTareas()) {
-            boolean entregada = entregas.stream()
-                .anyMatch(e -> e.getEstudiante().equals(estudiante) && e.getTarea().equals(tarea));
+            boolean entregada = entregas.containsKey(claveEntrega(estudiante, tarea));
             if (!entregada) {
                 pendientes.add(tarea);
             }

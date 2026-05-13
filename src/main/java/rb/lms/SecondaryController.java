@@ -161,7 +161,7 @@ public class SecondaryController {
                 }
                 break;
             case CALIFICAR:
-                List<Entrega> entregas = tareaS.getEntregas();
+                List<Entrega> entregas = new java.util.ArrayList<>(tareaS.getEntregas());
                 if (entregas.isEmpty()) {
                 	listaItems.getItems().add("(No hay entregas registradas)");
                 } else {
@@ -305,7 +305,7 @@ public class SecondaryController {
         }
 
         int index = listaItems.getSelectionModel().getSelectedIndex();
-        List<Entrega> entregas = tareaS.getEntregas();
+        List<Entrega> entregas = new java.util.ArrayList<>(tareaS.getEntregas());
 
         if (index == -1 || entregas.isEmpty()) {
             mostrarError("Selecciona una entrega de la lista");
